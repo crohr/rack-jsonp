@@ -23,6 +23,9 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "lib/rack/jsonp.rb",
+     "rack-jsonp.gemspec",
+     "spec/rack_jsonp_spec.rb",
      "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/crohr/rack-jsonp}
