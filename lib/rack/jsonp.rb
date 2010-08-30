@@ -24,7 +24,7 @@ module Rack
       env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param| param =~ /^(_|#{@callback_param})/}.join("&")
       
       status, headers, response = @app.call(env)
-      if callback
+      if callback && headers['Content-Type'] =~ /json/i
         response = pad(callback, response)
         headers['Content-Length'] = response.first.length.to_s
         headers['Content-Type'] = 'application/javascript'
