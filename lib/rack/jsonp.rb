@@ -27,6 +27,7 @@ module Rack
       if callback
         response = pad(callback, response)
         headers['Content-Length'] = response.first.length.to_s
+        headers['Content-Type'] = 'application/javascript'
       elsif @carriage_return && headers['Content-Type'] =~ /json/i
         # add a \n after the response if this is a json (not JSONP) response
         response = carriage_return(response)
