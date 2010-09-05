@@ -30,6 +30,15 @@ describe Rack::JSONP do
       headers = Rack::JSONP.new(app).call(request)[1]
       headers['Content-Length'].should == ((test_body.length + callback.length + 2).to_s) # 2 parentheses
     end
+    
+    it "should change the response Content-Type to application/javascript" do
+      test_body = '{"bar":"foo"}'
+      callback = 'foo'
+      app = lambda { |env| [200, {'Content-Type' => 'text/plain'}, [test_body]] }
+      request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
+      headers = Rack::JSONP.new(app).call(request)[1]
+      headers['Content-Type'].should == "application/javascript"
+    end
   end
  
   describe "when json content is returned" do
