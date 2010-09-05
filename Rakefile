@@ -12,6 +12,12 @@ begin
     gem.email = "cyril.rohr@gmail.com"
     gem.homepage = "http://github.com/crohr/rack-jsonp"
     gem.authors = ["Cyril Rohr"]
+    
+    gem.add_dependency('rack')
+    gem.add_development_dependency('rake')
+    gem.add_development_dependency('jeweler')
+    gem.add_development_dependency('rspec', '~> 2.0.0')
+    
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 

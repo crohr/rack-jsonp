@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    rack-jsonp (1.0.0)
+      rack
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -28,5 +34,6 @@ PLATFORMS
 DEPENDENCIES
   jeweler
   rack
+  rack-jsonp!
   rake
   rspec (~> 2.0.0)
