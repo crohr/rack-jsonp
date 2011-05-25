@@ -21,6 +21,30 @@ describe Rack::JSONP do
       body = Rack::JSONP.new(app, :callback_param => 'whatever').call(request).last
       body.should == ["#{callback}(#{test_body})"]
     end
+
+    it "removes the underscore parameter" do
+      test_body = '{"bar":"foo"}'
+      app_querystring = nil
+      app = lambda do |env|
+        app_querystring = env['QUERY_STRING']
+        [200, {'Content-Type' => 'application/json'}, [test_body]]
+      end
+      request = Rack::MockRequest.env_for("/", :params => "a=b&_=timestamp")
+      Rack::JSONP.new(app).call(request)
+      app_querystring.should == "a=b"
+    end
+
+    it "does not remove parameters that start with an underscore" do
+      test_body = '{"bar":"foo"}'
+      app_querystring = nil
+      app = lambda do |env|
+        app_querystring = env['QUERY_STRING']
+        [200, {'Content-Type' => 'application/json'}, [test_body]]
+      end
+      request = Rack::MockRequest.env_for("/", :params => "a=b&_=timestamp&_c=saveme")
+      Rack::JSONP.new(app).call(request)
+      app_querystring.should == "a=b&_c=saveme"
+    end
  
     it "should modify the content length to the correct value" do
       test_body = '{"bar":"foo"}'
