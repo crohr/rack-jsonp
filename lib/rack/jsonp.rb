@@ -21,7 +21,7 @@ module Rack
       # so that caching middleware does not store a copy for each value of the callback parameter
       request = Rack::Request.new(env)
       callback = request.params.delete(@callback_param)
-      env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param| param =~ /^(_|#{@callback_param})/}.join("&")
+      env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param| param =~ /^(_|#{@callback_param})=/}.join("&")
       
       status, headers, response = @app.call(env)
       if callback && headers['Content-Type'] =~ /json/i
