@@ -3,30 +3,12 @@ Bundler.setup
 
 require 'rake'
 
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "rack-jsonp"
-    gem.summary = %Q{A Rack middleware for providing JSON-P support.}
-    gem.description = %Q{A Rack middleware for providing JSON-P support.}
-    gem.email = "cyril.rohr@gmail.com"
-    gem.homepage = "http://github.com/crohr/rack-jsonp"
-    gem.authors = ["Cyril Rohr"]
-    
-    gem.add_dependency('rack')
-    gem.add_development_dependency('rake')
-    gem.add_development_dependency('jeweler')
-    gem.add_development_dependency('rspec', '< 2.0.0')
-    
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
-  end
-
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
-end
+lib = File.expand_path('../lib/', __FILE__)
+$:.unshift lib unless $:.include?(lib)
+require 'rack/jsonp'
 
 require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec) do |spec|	
+Spec::Rake::SpecTask.new(:spec) do |spec|
   spec.libs << 'lib' << 'spec'
   spec.spec_files = FileList['spec/**/*_spec.rb']
 end
@@ -41,12 +23,7 @@ task :default => :spec
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  if File.exist?('VERSION')
-    version = File.read('VERSION')
-  else
-    version = ""
-  end
-
+  version = Rack::JSONP::VERSION
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "rack-jsonp #{version}"
   rdoc.rdoc_files.include('README*')
