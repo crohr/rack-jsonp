@@ -30,12 +30,12 @@ module Rack
       status, headers, response = @app.call(env)
       if callback && headers['Content-Type'] =~ /json/i
         response = pad(callback, response)
-        headers['Content-Length'] = response.first.length.to_s
+        headers['Content-Length'] = response.first.bytesize.to_s
         headers['Content-Type'] = 'application/javascript'
       elsif @carriage_return && headers['Content-Type'] =~ /json/i
         # add a \n after the response if this is a json (not JSONP) response
         response = carriage_return(response)
-        headers['Content-Length'] = response.first.length.to_s
+        headers['Content-Length'] = response.first.bytesize.to_s
       end
       [status, headers, response]
     end
