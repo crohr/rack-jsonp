@@ -7,8 +7,6 @@ module Rack
   #
   class JSONP
 
-    VERSION = "1.2.0"
-
     def initialize(app, options = {})
       @app = app
       @carriage_return = options[:carriage_return] || false

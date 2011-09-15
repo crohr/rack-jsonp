@@ -1,12 +1,8 @@
 # -*- encoding: utf-8 -*-
-lib = File.expand_path('../lib/', __FILE__)
-$:.unshift lib unless $:.include?(lib)
-
-require 'rack/jsonp'
 
 Gem::Specification.new do |s|
   s.name                      = "rack-jsonp"
-  s.version                   = Rack::JSONP::VERSION
+  s.version                   = "1.2.0"
   s.platform                  = Gem::Platform::RUBY
   s.required_ruby_version     = '>= 1.8'
   s.required_rubygems_version = ">= 1.3"
