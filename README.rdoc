@@ -1,11 +1,15 @@
 = rack-jsonp
 
-A Rack middleware for providing JSON-P support. Most of it is taken from the original Rack::JSONP middleware present in rack-contrib.
+A Rack middleware for providing JSON-P support. Most of it is taken from the
+original Rack::JSONP middleware present in rack-contrib.
 
-Since I don't want to include the complete rack-contrib gem when all I need is the JSONP middleware, I created this gem.
+Since I don't want to include the complete rack-contrib gem when all I need is
+the JSONP middleware, I created this gem.
 
 == Contributions
-* Patches by Sebastián Gamboa (sagmor), Garrett Bjerkhoel (dewski) and Jason Morrison (jasonm).
+
+* Patches by Sebastián Gamboa (sagmor), Garrett Bjerkhoel (dewski), Jason
+  Morrison (jasonm), Brian Dunn (briandunn), Jon Allured (jonallured).
 
 == Copyright
 
