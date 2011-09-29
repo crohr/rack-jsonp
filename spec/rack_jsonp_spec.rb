@@ -1,3 +1,4 @@
+# coding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 
@@ -12,7 +13,7 @@ describe Rack::JSONP do
       body = Rack::JSONP.new(app).call(request).last
       body.should == ["#{callback}(#{test_body})"]
     end
-    
+
     it "should wrap the response body in the Javascript callback [custom callback param]" do
       test_body = '{"bar":"foo"}'
       callback = 'foo'
@@ -45,16 +46,22 @@ describe Rack::JSONP do
       Rack::JSONP.new(app).call(request)
       app_querystring.should == "a=b&_c=saveme"
     end
- 
-    it "should modify the content length to the correct value" do
-      test_body = '{"bar":"foo"}'
-      callback = 'foo'
-      app = lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] }
-      request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
-      headers = Rack::JSONP.new(app).call(request)[1]
-      headers['Content-Length'].should == ((test_body.length + callback.length + 2).to_s) # 2 parentheses
+
+    describe "content length" do
+      let(:callback) {'foo'}
+      let(:app) { lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] } }
+      let(:request) { Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}") }
+      subject {Rack::JSONP.new(app).call(request)[1]['Content-Length']}
+      context "with all single byte chars" do
+        let(:test_body) {'{"bar":"foo"}'}
+        it { should == "18" }
+      end
+      context "when the body contains an umlaut" do
+        let(:test_body) {'{"bär":"foo"}'}
+        it { should == "19" }
+      end
     end
-    
+
     it "should change the response Content-Type to application/javascript" do
       test_body = '{"bar":"foo"}'
       callback = 'foo'
@@ -63,7 +70,7 @@ describe Rack::JSONP do
       headers = Rack::JSONP.new(app).call(request)[1]
       headers['Content-Type'].should == "application/javascript"
     end
-    
+
     it "should not wrap content unless response is json" do
       test_body = '<html><body>Hello, World!</body></html>'
       callback = 'foo'
@@ -73,7 +80,7 @@ describe Rack::JSONP do
       body.should == [test_body]
     end
   end
- 
+
   describe "when json content is returned" do
     it "should do nothing if no carriage return has been requested" do
       test_body = '{"bar":"foo"}'
@@ -98,7 +105,7 @@ describe Rack::JSONP do
       body.should == ["#{callback}(#{test_body})"]
     end
   end
-  
+
   it "should not change anything if no callback param is provided" do
     app = lambda { |env| [200, {'Content-Type' => 'application/json'}, ['{"bar":"foo"}']] }
     request = Rack::MockRequest.env_for("/", :params => "foo=bar")
