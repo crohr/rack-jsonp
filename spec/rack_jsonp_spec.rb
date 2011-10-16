@@ -4,6 +4,57 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Rack::JSONP do
 
+  describe "closing application's response" do
+    let(:test_body) { ['test_body'] }
+    let(:params) { "foo=bar" }
+    let(:content_type) { "text/html" }
+    let(:app_params) {{}}
+    after do
+      request = Rack::MockRequest.env_for("/", :params => params)
+      app = lambda { |env| [200, {'Content-Type' => content_type}, test_body] }
+      Rack::JSONP.new(app, app_params).call(request).last
+    end
+
+    describe "when app response is closeable" do
+      let(:test_body) { ['test_body'].stub(:close => true) }
+
+      describe "and it is json" do
+        let(:content_type) { "application/json" }
+
+        describe "and callback was given" do
+          let(:params) { "foo=bar&callback=foo" }
+
+          it "closes the original body" do
+            test_body.should_receive(:close)
+          end
+        end
+
+        describe "and carriage return was requested" do
+          let(:app_params) {{ :carriage_return => true }}
+
+          it "closes the original body" do
+            test_body.should_receive(:close)
+          end
+        end
+      end
+
+      describe "and it is not json" do
+        let(:content_type) { "text/html"}
+        let(:params) { "foo=bar&callback=foo" }
+        it "does not close original body" do
+          test_body.should_not_receive(:close)
+        end
+      end
+    end
+
+    describe "when app response is not closeable" do
+        let(:params) { "foo=bar&callback=foo" }
+        it "does not close original body" do
+          test_body.should_not_receive(:close)
+        end
+    end
+  end
+
   describe "when a callback parameter is provided" do
     it "should wrap the response body in the Javascript callback [default callback param]" do
       test_body = '{"bar":"foo"}'
