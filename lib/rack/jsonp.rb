@@ -25,17 +25,28 @@ module Rack
       callback = request.params.delete(@callback_param)
       env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param| param =~ /^(_|#{@callback_param})=/}.join("&")
 
-      status, headers, response = @app.call(env)
-      if callback && headers['Content-Type'] =~ /json/i
-        response = pad(callback, response)
-        headers['Content-Length'] = response.first.bytesize.to_s
+      status, headers, app_response = @app.call(env)
+      response = if callback && headers['Content-Type'] =~ /json/i
+        json = pad(callback, app_response)
+        headers['Content-Length'] = json.first.bytesize.to_s
         headers['Content-Type'] = 'application/javascript'
+        json
       elsif @carriage_return && headers['Content-Type'] =~ /json/i
         # add a \n after the response if this is a json (not JSONP) response
-        response = carriage_return(response)
-        headers['Content-Length'] = response.first.bytesize.to_s
+        json = carriage_return(app_response)
+        headers['Content-Length'] = json.first.bytesize.to_s
+        json
+      else
+        nil
       end
-      [status, headers, response]
+
+      # Close original response if it was Rack::BodyProxy (or anything else responding to close,
+      # as we're going to lose it anyway), or it will cause thread failures with newer Rack
+      if app_response.respond_to?(:close) && response
+        app_response.close
+      end
+
+      [status, headers, response || app_response]
     end
 
     # Pads the response with the appropriate callback format according to the
