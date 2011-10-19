@@ -9,7 +9,8 @@ the JSONP middleware, I created this gem.
 == Contributions
 
 * Patches by Sebastián Gamboa (sagmor), Garrett Bjerkhoel (dewski), Jason
-  Morrison (jasonm), Brian Dunn (briandunn), Jon Allured (jonallured).
+  Morrison (jasonm), Brian Dunn (briandunn), Jon Allured (jonallured), Oleg
+  Ivanov (morhekil).
 
 == Copyright
 
