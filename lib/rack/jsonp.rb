@@ -11,6 +11,7 @@ module Rack
       @app = app
       @carriage_return = options[:carriage_return] || false
       @callback_param = options[:callback_param] || 'callback'
+      @timestamp_param = options[:timestamp_param] || '_'
     end
 
     # Proxies the request to the application, stripping out the JSON-P
@@ -25,10 +26,12 @@ module Rack
       # callback parameter
       request = Rack::Request.new(env)
       callback = request.params.delete(@callback_param)
+      timestamp = request.params.delete(@timestamp_param)
       env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param|
-        param =~ /^(_|#{@callback_param})=/
+        param =~ /^(#{@timestamp_param}|#{@callback_param})=/
       }.join("&")
       env['rack.jsonp.callback'] = callback
+      env['rack.jsonp.timestamp'] = timestamp
 
       status, headers, response = @app.call(env)
 
