@@ -28,6 +28,7 @@ module Rack
       env['QUERY_STRING'] = env['QUERY_STRING'].split("&").delete_if{|param|
         param =~ /^(_|#{@callback_param})=/
       }.join("&")
+      env['rack.jsonp.callback'] = callback
 
       status, headers, response = @app.call(env)
 
