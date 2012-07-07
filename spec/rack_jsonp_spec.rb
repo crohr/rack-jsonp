@@ -75,27 +75,31 @@ describe Rack::JSONP do
     end
 
     it "removes the underscore parameter" do
-      test_body = '{"bar":"foo"}'
-      app_querystring = nil
       app = lambda do |env|
-        app_querystring = env['QUERY_STRING']
-        [200, {'Content-Type' => 'application/json'}, [test_body]]
+        [200, {'Content-Type' => 'application/json'}, [env['QUERY_STRING']]]
       end
       request = Rack::MockRequest.env_for("/", :params => "a=b&_=timestamp")
-      Rack::JSONP.new(app).call(request)
-      app_querystring.should == "a=b"
+      status, headers, body = Rack::JSONP.new(app).call(request)
+      body.should == ["a=b"]
     end
 
     it "does not remove parameters that start with an underscore" do
-      test_body = '{"bar":"foo"}'
-      app_querystring = nil
       app = lambda do |env|
-        app_querystring = env['QUERY_STRING']
-        [200, {'Content-Type' => 'application/json'}, [test_body]]
+        [200, {'Content-Type' => 'application/json'}, [env['QUERY_STRING']]]
       end
       request = Rack::MockRequest.env_for("/", :params => "a=b&_=timestamp&_c=saveme")
-      Rack::JSONP.new(app).call(request)
-      app_querystring.should == "a=b&_c=saveme"
+      status, headers, body = Rack::JSONP.new(app).call(request)
+      body.should == ["a=b&_c=saveme"]
+    end
+
+    it "should store the callback and timestamp params in the environment" do
+      app = lambda do |env|
+        result = [env['rack.jsonp.timestamp'], env['rack.jsonp.callback']].join(";")
+        [200, {'Content-Type' => 'application/json'}, [result]]
+      end
+      request = Rack::MockRequest.env_for("/", :params => "a=b&tparam=timestamp&cparam=callback")
+      status, headers, body = Rack::JSONP.new(app, :timestamp_param => "tparam", :callback_param => "cparam").call(request)
+      body.should == ["callback(timestamp;callback)"]
     end
 
     describe "content length" do
