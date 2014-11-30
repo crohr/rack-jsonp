@@ -56,7 +56,9 @@ module Rack
     # since JSON is returned as a full string.
     #
     def pad(callback, response, body = "")
-      response.each{ |s| body << s.to_s }
+      response.each do |s|
+        body << s.to_s.gsub("\u2028", '\u2028').gsub("\u2029", '\u2029')
+      end
       close(response)
       ["#{callback}(#{body})"]
     end
