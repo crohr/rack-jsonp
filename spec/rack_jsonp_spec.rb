@@ -159,6 +159,14 @@ describe Rack::JSONP do
       body = Rack::JSONP.new(app, :carriage_return => true).call(request).last
       body.should == ["#{callback}(#{test_body})"]
     end
+    it 'replaces' do
+      test_body = "{\"bar\":\"\u2028 and \u2029\"}"
+      callback = 'foo'
+      app = lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] }
+      request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
+      body = Rack::JSONP.new(app).call(request).last
+      body.join.should_not =~ /\u2028|\u2029/
+    end
   end
 
   it "should not change anything if no callback param is provided" do
