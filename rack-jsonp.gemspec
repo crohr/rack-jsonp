@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name                      = "rack-jsonp"
-  s.version                   = "1.3.1"
+  s.version                   = "1.3.2"
   s.platform                  = Gem::Platform::RUBY
   s.required_ruby_version     = '>= 1.8'
   s.required_rubygems_version = ">= 1.3"
