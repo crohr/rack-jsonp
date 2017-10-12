@@ -12,6 +12,7 @@ module Rack
       @carriage_return = options[:carriage_return] || false
       @callback_param = options[:callback_param] || 'callback'
       @timestamp_param = options[:timestamp_param] || '_'
+      @callback_regex = options[:callback_regex] || /^[a-zA-Z0-9]{1,32}$/
     end
 
     # Proxies the request to the application, stripping out the JSON-P
@@ -35,8 +36,9 @@ module Rack
 
       status, headers, response = @app.call(env)
 
-      if callback && headers['Content-Type'] =~ /json/i
+      if callback && callback =~ @callback_regex && headers['Content-Type'] =~ /json/i
         response = pad(callback, response)
+        headers['Content-Type-Options'] = 'nosniff'
         headers['Content-Length'] = response.first.bytesize.to_s
         headers['Content-Type'] = 'application/javascript'
       elsif @carriage_return && headers['Content-Type'] =~ /json/i
@@ -60,7 +62,7 @@ module Rack
         body << s.to_s.gsub("\u2028", '\u2028').gsub("\u2029", '\u2029')
       end
       close(response)
-      ["#{callback}(#{body})"]
+      ["/**/#{callback}(#{body})"]
     end
 
     def carriage_return(response, body = "")
