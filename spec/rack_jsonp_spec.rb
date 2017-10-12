@@ -62,7 +62,18 @@ describe Rack::JSONP do
       app = lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] }
       request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
       body = Rack::JSONP.new(app).call(request).last
-      body.should == ["#{callback}(#{test_body})"]
+      body.should == ["/**/#{callback}(#{test_body})"]
+    end
+
+    context 'and is invalid' do
+      it 'should ignore it' do
+        test_body = '{"bar":"foo"}'
+        callback = '<>'
+        app = lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] }
+        request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
+        body = Rack::JSONP.new(app).call(request).last
+        body.should == ["#{test_body}"]
+      end
     end
 
     it "should wrap the response body in the Javascript callback [custom callback param]" do
@@ -71,7 +82,7 @@ describe Rack::JSONP do
       app = lambda { |env| [200, {'Content-Type' => 'application/json'}, [test_body]] }
       request = Rack::MockRequest.env_for("/", :params => "foo=bar&whatever=#{callback}")
       body = Rack::JSONP.new(app, :callback_param => 'whatever').call(request).last
-      body.should == ["#{callback}(#{test_body})"]
+      body.should == ["/**/#{callback}(#{test_body})"]
     end
 
     it "removes the underscore parameter" do
@@ -99,7 +110,16 @@ describe Rack::JSONP do
       end
       request = Rack::MockRequest.env_for("/", :params => "a=b&tparam=timestamp&cparam=callback")
       status, headers, body = Rack::JSONP.new(app, :timestamp_param => "tparam", :callback_param => "cparam").call(request)
-      body.should == ["callback(timestamp;callback)"]
+      body.should == ["/**/callback(timestamp;callback)"]
+    end
+
+    describe 'content type options' do
+      let(:callback) {'foo'}
+      let(:app) { lambda { |env| [200, {'Content-Type' => 'application/json'}, ['{"bar":"foo"}']] } }
+      let(:request) { Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}") }
+      subject {Rack::JSONP.new(app).call(request)[1]['Content-Type-Options']}
+
+      it { should == 'nosniff' }
     end
 
     describe "content length" do
@@ -109,11 +129,11 @@ describe Rack::JSONP do
       subject {Rack::JSONP.new(app).call(request)[1]['Content-Length']}
       context "with all single byte chars" do
         let(:test_body) {'{"bar":"foo"}'}
-        it { should == "18" }
+        it { should == "22" }
       end
       context "when the body contains an umlaut" do
         let(:test_body) {'{"bär":"foo"}'}
-        it { should == "19" }
+        it { should == "23" }
       end
     end
 
@@ -157,7 +177,7 @@ describe Rack::JSONP do
       app = lambda { |env| [200, {'Content-Type' => 'application/vnd.com.example.Object+json'}, [test_body]] }
       request = Rack::MockRequest.env_for("/", :params => "foo=bar&callback=#{callback}")
       body = Rack::JSONP.new(app, :carriage_return => true).call(request).last
-      body.should == ["#{callback}(#{test_body})"]
+      body.should == ["/**/#{callback}(#{test_body})"]
     end
     it 'replaces' do
       test_body = "{\"bar\":\"\u2028 and \u2029\"}"
